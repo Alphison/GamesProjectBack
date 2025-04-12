@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Data\LoginData;
 use App\Data\RegisterData;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -13,6 +14,7 @@ class AuthService
     public function register(RegisterData $data): User
     {
         return User::create([
+            'name' => $data->name,
             'email' => $data->email,
             'password' => Hash::make($data->password),
         ]);
@@ -29,6 +31,10 @@ class AuthService
         }
 
         return $user;
+    }
+
+    public function me(){
+        return Auth::user();
     }
 
     public function logout(User $user): void

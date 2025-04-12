@@ -44,6 +44,12 @@ class AuthController extends Controller
         ]);
     }
 
+    public function me(){
+        $user = $this->authService->me();
+
+        return response()->json($user);
+    }
+
     /**
      * Выход пользователя (удаление токена)
      */

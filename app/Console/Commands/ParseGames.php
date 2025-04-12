@@ -9,11 +9,14 @@ use Symfony\Component\DomCrawler\Crawler;
 use App\Models\Game;
 use App\Models\Category;
 use App\Models\Genre;
+use BcMath\Number;
 
 class ParseGames extends Command
 {
     protected $signature = 'parse:games';
     protected $description = 'Parse games and genres from HTML page';
+
+    private $percent = 0.2;
 
     private HtmlFetcherService $htmlFetcher;
 
@@ -88,7 +91,7 @@ class ParseGames extends Command
                 
                 return [
                     'title' => $node->filter('a.s-title')->text(),
-                    'price' => $price,
+                    'price' => $price + ((int)$price * $this->percent),
                     'preview' => $node->filter('img')->attr('src'),
                     'description' => $crawlerGame->filter('div.full-text')->text(),
                     'date_exit' => $releaseDate,

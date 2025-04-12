@@ -12,6 +12,8 @@ use Spatie\LaravelData\Data;
 class RegisterData extends Data
 {
     public function __construct(
+        #[Required, Max(255)]
+        public string $name,
         #[Required, Email, Max(255), Unique('users', 'email')]
         public string $email,
         #[Required, Min(8)]
