@@ -16,8 +16,6 @@ class ParseGames extends Command
     protected $signature = 'parse:games';
     protected $description = 'Parse games and genres from HTML page';
 
-    private $percent = 0.2;
-
     private HtmlFetcherService $htmlFetcher;
 
     public function __construct(HtmlFetcherService $htmlFetcher)
@@ -63,41 +61,8 @@ class ParseGames extends Command
 
         do {
             $url = "https://404game.ru/genre/page/{$page}";
-            $crawler = $this->htmlFetcher->fetchHtml($url);
 
-            $games = $crawler->filter('div.short')->each(function (Crawler $node) {
-                $urlOnegame = $node->filter('a.s-img')->attr('href');
-                $crawlerGame = $this->htmlFetcher->fetchHtml($urlOnegame); // страница одной игры
-
-                $priceText = $node->filter('div.s-price')->text();
-                $releaseDate = null;
-                $language = null;
-
-                if (preg_match('/(\d+)\s*руб/', $priceText, $matches)) {
-                    $price = $matches[1];
-                } else {
-                    $price = null;
-                }
-
-                if ($crawlerGame->filter('ul.finfo li:contains("Дата выхода:")')->count() > 0) {
-                    $dateText = $crawlerGame->filter('ul.finfo li:contains("Дата выхода:")')->text();
-                    $releaseDate = trim(str_replace('Дата выхода:', '', $dateText));
-                }
-
-                if ($crawlerGame->filter('ul.finfo li:contains("Локализация:")')->count() > 0) {
-                    $languageText = $crawlerGame->filter('ul.finfo li:contains("Локализация:")')->text();
-                    $language = trim(str_replace('Локализация:', '', $languageText));
-                }
-                
-                return [
-                    'title' => $node->filter('a.s-title')->text(),
-                    'price' => $price + ((int)$price * $this->percent),
-                    'preview' => $node->filter('img')->attr('src'),
-                    'description' => $crawlerGame->filter('div.full-text')->text(),
-                    'date_exit' => $releaseDate,
-                    'language' => $language,
-                ];
-            });
+            $games = $this->htmlFetcher->getGamesFromHtml($url);
 
             if (empty($games)) {
                 $this->info('No more games found.');
