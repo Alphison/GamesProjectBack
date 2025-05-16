@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Game;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\PopularGame;
 
 class GameController extends Controller
 {
@@ -12,9 +13,16 @@ class GameController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         $page = $request->input('page', 1);
+        $genre_id = $request->input('genre_id');
         
-        $games = Game::query()->paginate($perPage, ['*'], 'page', $page);
+        $query = Game::query();
+    
+        if ($genre_id) {
+            $query->where('genre_id', $genre_id);
+        }
         
+        $games = $query->paginate($perPage, ['*'], 'page', $page);
+
         return response()->json([
             'games' => $games->items(),
             'next_page' => $games->hasMorePages() ? $games->currentPage() + 1 : null,
@@ -37,4 +45,6 @@ class GameController extends Controller
             'game' => $game
         ]);
     }
+
+
 }

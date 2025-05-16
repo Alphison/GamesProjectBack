@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\GenreController;
 use App\Http\Controllers\Api\PopularGameController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -20,11 +21,19 @@ Route::controller(GameController::class)->group(function () {
     Route::get('/games', 'getAll');
     Route::get('/game/{id}', 'show');
 
+
+});
+
+Route::controller(GenreController::class)->group(function () {
+
+    Route::get('/genres', 'getAll');
+
 });
 
 Route::controller(PopularGameController::class)->group(function () {
 
     Route::get('/popular_games', 'getAll');
+    Route::get('/game_popular/{id}', 'show');
 
 });
 

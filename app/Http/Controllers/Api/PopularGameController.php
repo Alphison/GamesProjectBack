@@ -15,4 +15,19 @@ class PopularGameController extends Controller
             'games' => $games,
         ]);
     }
+
+    public function show($id)
+    {
+        $game = PopularGame::find($id);
+        
+        if (!$game) {
+            return response()->json([
+                'message' => 'Game not found'
+            ], 404);
+        }
+        
+        return response()->json([
+            'game' => $game
+        ]);
+    }
 }
