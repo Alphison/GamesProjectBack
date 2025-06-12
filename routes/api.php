@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GenreController;
 use App\Http\Controllers\Api\PopularGameController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthController::class)->group(function () {
@@ -20,7 +21,6 @@ Route::controller(GameController::class)->group(function () {
 
     Route::get('/games', 'getAll');
     Route::get('/game/{id}', 'show');
-
 
 });
 
@@ -40,5 +40,11 @@ Route::controller(PopularGameController::class)->group(function () {
 Route::controller(UserController::class)->group(function () {
 
     Route::post('/change/password', 'changePassword')->middleware(['auth:sanctum']);
+
+});
+
+Route::controller(InvoiceController::class)->group(function () {
+
+    Route::post('/invoice', 'createInvoice');
 
 });
