@@ -40,50 +40,66 @@ class ParseGames extends Command
 
     private function parseGenres()
     {
-        $url = 'https://404game.ru/';
+        $url = 'https://igroarenda.ru/';
         $crawler = $this->htmlFetcher->fetchHtml($url);
 
-        $genres = $crawler->filter('ul.side-bc > li > a')->each(function (Crawler $node) {
-            return $node->text();
+        $genres = $crawler->filter('ul.navbar-nav > li > a')->each(function (Crawler $node) {
+            return [
+                'text' => $node->text(),
+                'href' => $node->attr('href'),
+            ];;
         });
 
-        foreach ($genres as $genreName) {
-            Genre::firstOrCreate(['name' => trim($genreName)]);
+        foreach ($genres as $genre) {
+            Genre::firstOrCreate(['name' => trim($genre['text']), 'href' => $genre['href']]);
         }
 
         $this->info('Genres parsed successfully!');
+
+        return $genres;
     }
 
     private function parseGames()
     {
         $page = 1;
-        $max_page = 30;
+        $max_page = false;
 
-        do {
-            $url = "https://404game.ru/genre/page/{$page}";
+        $genres = Genre::all();
 
-            $games = $this->htmlFetcher->getGamesFromHtml($url);
+        foreach ($genres as $genre) {
+            $max_page = true;
 
-            if (empty($games)) {
-                $this->info('No more games found.');
-                break;
-            }
+             do {
+                $url = "{$genre['href']}?page={$page}";
 
-            foreach ($games as $gameData) {
-                Game::create([
-                    'title' => $gameData['title'],
-                    'price' => $gameData['price'],
-                    'preview' => $gameData['preview'],
-                    'description' => $gameData['description'],
-                    'date_exit' => $gameData['date_exit'],
-                    'language' => $gameData['language'],
-                    'category_id' => Category::inRandomOrder()->first()->id,
-                    'genre_id' => Genre::inRandomOrder()->first()->id,
-                ]);
-            }
+                $games = $this->htmlFetcher->getGamesFromHtml($url);
 
-            $page++;
-        } while ($page <= $max_page);
+                if (empty($games)) {
+                    $this->info('No more games found.');
+                    $max_page = false;
+                    $page = 1;
+                    break;
+                }
+
+                foreach ($games as $gameData) {
+                    $game = Game::updateOrCreate(['title' => $gameData['title']], // Условие поиска
+                    [                              // Данные для обновления/создания
+                        'price' => $gameData['price'],
+                        'preview' => $gameData['preview'],
+                        'description' => $gameData['description'],
+                        'date_exit' => $gameData['date_exit'],
+                        'language' => $gameData['language'],
+                        'category_id' => Category::inRandomOrder()->first()->id,
+                    ]);
+
+                    $game->genres()->syncWithoutDetaching([$genre['id']]);
+                }
+
+                $page++;
+            } while ($max_page);
+        }
+
+       
 
         $this->info('Games parsed successfully!');
     }

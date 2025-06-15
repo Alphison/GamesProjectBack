@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Genre extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'href'];
 
-    public function games()
+    public function games(): BelongsToMany
     {
-        return $this->hasMany(Game::class);
+        return $this->belongsToMany(Game::class, 'game_genre');
     }
 }
